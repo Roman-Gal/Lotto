@@ -1,8 +1,11 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.OptionalLong;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.StringJoiner;
 
 public class LOTOTREJA {
     private static final int TICKET_SIZE = 6;
@@ -63,11 +66,24 @@ public class LOTOTREJA {
             attempts++;
         } while (draw != ticket);
 
-        System.out.printf("Виграшна комбінація %s. Кількість спроб: %d.%n", ticketNumbers(draw), attempts);
-        System.out.printf("Наступні %d розіграшів:%n", DRAWS_AFTER_WIN);
+        printWinningTicket(ticketNumbers(draw), attempts);
+        System.out.printf("%nНаступні %d розіграшів:%n", DRAWS_AFTER_WIN);
         for (int i = 0; i < DRAWS_AFTER_WIN; i++) {
             System.out.println(ticketNumbers(drawNumbers(random)));
         }
+    }
+
+    private static void printWinningTicket(List<Integer> numbers, long attempts) {
+        StringJoiner balls = new StringJoiner(" ");
+        for (int number : numbers) {
+            balls.add(String.format(Locale.ROOT, "│ %02d │", number));
+        }
+
+        System.out.printf("%nВиграшна комбінація%n");
+        System.out.println(String.join(" ", Collections.nCopies(numbers.size(), "╭────╮")));
+        System.out.println(balls);
+        System.out.println(String.join(" ", Collections.nCopies(numbers.size(), "╰────╯")));
+        System.out.printf("Кількість спроб: %d%n", attempts);
     }
 
     private static long drawNumbers(Random random) {
