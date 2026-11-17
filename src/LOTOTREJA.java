@@ -1,63 +1,95 @@
-//звичайна лотерея що видасть десять псевдорандомних результатів після того як досягне обраного результату
-//
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.List;
+import java.util.OptionalLong;
 import java.util.Random;
 import java.util.Scanner;
 
 public class LOTOTREJA {
-
+    private static final int TICKET_SIZE = 6;
+    private static final int MAX_NUMBER = 49;
+    private static final int DRAWS_AFTER_WIN = 10;
 
     public static void main(String[] args) {
-
-
-
-        Scanner s = new Scanner(System.in);
-        ArrayList<Integer> wygralo = new ArrayList<>();
-        System.out.println("Введи число1");
-        wygralo.add(s.nextInt());
-        System.out.println("Введи число2");
-        wygralo.add(s.nextInt());
-        System.out.println("Введи число3");
-        wygralo.add(s.nextInt());
-        System.out.println("Введи число4");
-        wygralo.add(s.nextInt());
-        System.out.println("Введи число5");
-        wygralo.add(s.nextInt());
-        System.out.println("Введи число6");
-        wygralo.add(s.nextInt());
-
-
-
-        int n = 0;
-        for (int j = 1; true;) {
-            ArrayList<Integer> numbersGenerated = new ArrayList<>();
-            n = n + 1;
-            for (int i = 0; i < 6; i++) {
-                Random randNumber = new Random();
-                int iNumber = randNumber.nextInt(49) + 1;
-                if (!numbersGenerated.contains(iNumber)) {
-                    numbersGenerated.add(iNumber);
-                } else {
-                    i--;
-                }
+        try (Scanner input = new Scanner(System.in)) {
+            OptionalLong ticket = readTicket(input);
+            if (ticket.isEmpty()) {
+                System.out.println("Ввід завершено до заповнення квитка.");
+                return;
             }
-            Collections.sort(numbersGenerated);
-            System.out.println(numbersGenerated);
-            if (numbersGenerated.containsAll(wygralo)) {
-                System.out.println("ВИГРАВ");
-                System.out.println("ВИГРАВ");
-                System.out.println("ВИГРАВ");
-                System.out.println("ВИГРАВ");
-                System.out.println("ВИГРАВ");
-                System.out.println("кількість ітерацій" + " " + n);
-                n = -10;
-                //kjjjkjkjjk
-            }
-            if (n == 0) {break;}
 
-
+            simulate(ticket.getAsLong(), new Random());
         }
+    }
 
+    private static OptionalLong readTicket(Scanner input) {
+        System.out.printf("Введи %d різних чисел від 1 до %d.%n", TICKET_SIZE, MAX_NUMBER);
+
+        long ticket = 0;
+        int numbersEntered = 0;
+        while (numbersEntered < TICKET_SIZE) {
+            System.out.printf("Число %d з %d:%n", numbersEntered + 1, TICKET_SIZE);
+            if (!input.hasNext()) {
+                return OptionalLong.empty();
+            }
+            if (!input.hasNextInt()) {
+                input.next();
+                System.out.println("Потрібно ввести ціле число.");
+                continue;
+            }
+
+            int number = input.nextInt();
+            if (number < 1 || number > MAX_NUMBER) {
+                System.out.printf("Число має бути від 1 до %d.%n", MAX_NUMBER);
+                continue;
+            }
+
+            long bit = numberBit(number);
+            if ((ticket & bit) != 0) {
+                System.out.println("Це число вже є у квитку.");
+                continue;
+            }
+
+            ticket |= bit;
+            numbersEntered++;
+        }
+        return OptionalLong.of(ticket);
+    }
+
+    private static void simulate(long ticket, Random random) {
+        long attempts = 0;
+        long draw;
+        do {
+            draw = drawNumbers(random);
+            attempts++;
+        } while (draw != ticket);
+
+        System.out.printf("Виграшна комбінація %s. Кількість спроб: %d.%n", ticketNumbers(draw), attempts);
+        System.out.printf("Наступні %d розіграшів:%n", DRAWS_AFTER_WIN);
+        for (int i = 0; i < DRAWS_AFTER_WIN; i++) {
+            System.out.println(ticketNumbers(drawNumbers(random)));
+        }
+    }
+
+    private static long drawNumbers(Random random) {
+        long draw = 0;
+        while (Long.bitCount(draw) < TICKET_SIZE) {
+            draw |= numberBit(random.nextInt(MAX_NUMBER) + 1);
+        }
+        return draw;
+    }
+
+    private static long numberBit(int number) {
+        // Each of the 49 possible numbers maps to a distinct bit in a long.
+        return 1L << (number - 1);
+    }
+
+    private static List<Integer> ticketNumbers(long ticket) {
+        List<Integer> numbers = new ArrayList<>(TICKET_SIZE);
+        for (int number = 1; number <= MAX_NUMBER; number++) {
+            if ((ticket & numberBit(number)) != 0) {
+                numbers.add(number);
+            }
+        }
+        return numbers;
     }
 }
