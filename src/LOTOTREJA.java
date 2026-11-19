@@ -7,6 +7,10 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.StringJoiner;
 
+/**
+ * Simulates independent six-of-49 lottery draws for a user-selected ticket.
+ * Each number occupies one bit, keeping the simulation free of per-draw lists.
+ */
 public class LOTOTREJA {
     private static final int TICKET_SIZE = 6;
     private static final int MAX_NUMBER = 49;

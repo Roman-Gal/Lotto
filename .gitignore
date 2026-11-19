@@ -1,2 +1,7 @@
-# Project exclude paths
+# Compiled classes
 /out/
+*.class
+
+# Local IDE metadata
+.idea/
+*.iml
